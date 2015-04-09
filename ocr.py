@@ -22,15 +22,15 @@ def upload_file():
             filename = secure_filename(file.filename)
             completename = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(completename)
-            call(["tesseract", completename, completename])
+            call(["tesseract", "-l por", completename, completename])
             out = check_output(["cat", completename+".txt"])
             data = {'text':out}
             return json.dumps(data)
 
     return '''
     <!doctype html>
-    <title>Envio de imagem</title>
-    <h1>Envie uma imagem</h1>
+    <title>Envio de Imagem</title>
+    <h1>Envie uma Imagem</h1>
     <form action="" method=post enctype=multipart/form-data>
       <p><input type=file name=file>
          <input type=submit value=Upload>
@@ -43,4 +43,4 @@ def uploaded_file(filename):
                                filename)
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0', debug=True)
