@@ -1,46 +1,22 @@
-import os, json
+#coding: utf-8
+
+import os, sys, argparse
 from subprocess import call, check_output
-from flask import Flask, request, send_from_directory
-from werkzeug import secure_filename
+from ocr_config import file_get_contents
 
-UPLOAD_FOLDER = '/tmp/'
-ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif', 'tif'])
-
-app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
-
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
-
-@app.route('/', methods=['GET', 'POST'])
-def upload_file():
-    if request.method == 'POST':
-        file = request.files['file']
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            completename = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file.save(completename)
-            call(["tesseract", "-l por", completename, completename])
-            out = check_output(["cat", completename+".txt"])
-            data = {'text':out}
-            return json.dumps(data)
-
-    return '''
-    <!doctype html>
-    <title>Envio de Imagem</title>
-    <h1>Envie uma Imagem</h1>
-    <form action="" method=post enctype=multipart/form-data>
-      <p><input type=file name=file>
-         <input type=submit value=Upload>
-    </form>
-    '''
-
-@app.route('/uploads/<filename>')
-def uploaded_file(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'],
-                               filename)
+def call_tesseract(filename):
+    call(["tesseract", filename, filename])
+    return file_get_contents(filename+".txt")
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', debug=True)
+    import argparse
+
+    parser = argparse.ArgumentParser(description='WebService for OCR.')
+    parser.add_argument('-f','--file', metavar='input', nargs='?', type=argparse.FileType('r'), default=sys.stdin, help='Input file path')
+    parser.add_argument('-o','--out', metavar='output', nargs='?', type=argparse.FileType('w'), default=sys.stdout, help='Output file path')
+    args = parser.parse_args()
+
+    txt = call_tesseract(os.path.abspath(args.file.name))
+    args.out.write(txt)
+    args.out.close()
+    args.file.close()

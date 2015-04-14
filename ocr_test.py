@@ -1,5 +1,9 @@
-import os, random, unittest, json
+#coding: utf-8
+
+import os, random, unittest, json, time
 import sys, re, requests, time
+from ocr_config import HOST, DAEMON, file_get_contents, port, free_port
+from subprocess import Popen
 
 def get_contents(imagename):
     """
@@ -8,13 +12,27 @@ def get_contents(imagename):
     """
     (path, ext) = os.path.splitext(imagename)
     txtname = path + ".txt"
-    with open(txtname, 'r') as content_file:
-        txtcontent = content_file.read()
-    r = requests.post('http://localhost:5000', files={'file': open(imagename, 'rb')})
+    txtcontent = file_get_contents(txtname)
+    r = requests.post('http://localhost:'+port()+HOST, files={'file': open(imagename, 'rb')})
     imagecontent = r.json()["text"]
     return (txtcontent, imagecontent)
 
 class TestOCR(unittest.TestCase):
+    def setUp(self):
+        """ Iniciando."""
+        self.port = port()
+        if self.port == 0:
+            print "Aqui"
+            self.port = free_port()
+            self.process = Popen(["python ocr_web.py -p %d" % self.port])
+            time.sleep(10)
+        self.host = 'http://localhost:5000'
+
+    def tearDown(self):
+        print "Bla"
+        self.process.terminate()
+        self.process.wait()
+
     def test_blank_image(self):
         """ Verifica se as duas instancias sao distintas."""
         (txt, image) = get_contents('test/bigblank.jpg')
