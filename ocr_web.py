@@ -1,11 +1,17 @@
-#coding: utf-8
+#!/usr/bin/python
+# -*- coding: UTF8 -*-
 
-import os, json, sys, re, socket, argparse
-from subprocess import call, check_output
+import os
+import json
+import socket
+
 from flask import Flask, request, send_from_directory
+
 from werkzeug import secure_filename
+
 from ocr_config import HOST, UPLOAD_FOLDER, ALLOWED_EXTENSIONS, DAEMON, DEBUG, free_port
 from ocr import call_tesseract
+
 
 # Validadores usados para linha de comando.
 def valid_port(value):
@@ -22,6 +28,7 @@ def valid_port(value):
     sock.close()
     return ivalue
 
+
 def valid_ip(value):
     try:
         socket.inet_aton(value)
@@ -34,20 +41,22 @@ app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
+
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
-@app.route(HOST+"/<ong>", methods=['GET', 'POST'])
+
+@app.route(HOST + "/<ong>", methods=['GET', 'POST'])
 def upload_file(ong):
     if request.method == 'POST':
-        file = request.files['file']
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
+        filename = request.files['file']
+        if filename and allowed_file(filename.filename):
+            filename = secure_filename(filename.filename)
             completename = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file.save(completename)
+            filename.save(completename)
             out = call_tesseract(completename)
-            data = {'text':out}
+            data = {'text': out}
             return json.dumps(data)
 
     return '''
@@ -64,21 +73,23 @@ def upload_file(ong):
     ''' % ong
 
 
-@app.route(HOST+'/uploads/<filename>')
+@app.route(HOST + '/uploads/<filename>')
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
+
 if __name__ == "__main__":
     import argparse
+
     parser = argparse.ArgumentParser(description='WebService for OCR.')
-    parser.add_argument('-H','--host', metavar='IP', nargs='?', type=valid_ip, help='Host ip', default='0.0.0.0')
-    parser.add_argument('-p','--port', metavar='PORT', nargs='?', type=valid_port, help='Port number', default=5000)
+    parser.add_argument('-H', '--host', metavar='IP', nargs='?', type=valid_ip, help='Host ip', default='0.0.0.0')
+    parser.add_argument('-p', '--port', metavar='PORT', nargs='?', type=valid_port, help='Port number', default=5000)
     args = parser.parse_args()
 
     if args.port == 0:
         args.port = free_port()
 
-    f = os.open(DAEMON, os.O_WRONLY|os.O_CREAT)
+    f = os.open(DAEMON, os.O_WRONLY | os.O_CREAT)
     os.write(f, str(args.port))
     os.close(f)
     app.run(host=args.host, port=args.port, debug=DEBUG)

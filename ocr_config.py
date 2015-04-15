@@ -1,16 +1,19 @@
-#coding: utf-8
+#!/usr/bin/python
+# -*- coding: UTF8 -*-
 
 import socket
 
-HOST='/ocr-web'
+HOST = '/ocr-web'
 UPLOAD_FOLDER = '/tmp/'
-ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif', 'tif'])
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'tif'}
 DAEMON = '.ocr.daemon'
 DEBUG = True
+
 
 def file_get_contents(fname):
     with open(fname, 'r') as content_file:
         return content_file.read()
+
 
 def free_port():
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -18,6 +21,7 @@ def free_port():
     p = sock.getsockname()[1]
     sock.close()
     return p
+
 
 def port():
     try:

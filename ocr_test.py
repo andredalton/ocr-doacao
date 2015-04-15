@@ -1,9 +1,16 @@
-#coding: utf-8
+#!/usr/bin/python
+# -*- coding: UTF8 -*-
 
-import os, random, unittest, json, time
-import sys, re, requests, time
-from ocr_config import HOST, DAEMON, file_get_contents, port, free_port
+import os
+import unittest
+import time
+
+import requests
+
 from subprocess import Popen
+
+from ocr_config import HOST, file_get_contents, port, free_port
+
 
 def get_contents(imagename):
     """
@@ -13,9 +20,10 @@ def get_contents(imagename):
     (path, ext) = os.path.splitext(imagename)
     txtname = path + ".txt"
     txtcontent = file_get_contents(txtname)
-    r = requests.post('http://localhost:'+port()+HOST, files={'file': open(imagename, 'rb')})
+    r = requests.post('http://localhost:' + port() + HOST, files={'file': open(imagename, 'rb')})
     imagecontent = r.json()["text"]
-    return (txtcontent, imagecontent)
+    return txtcontent, imagecontent
+
 
 class TestOCR(unittest.TestCase):
     def setUp(self):
@@ -36,20 +44,21 @@ class TestOCR(unittest.TestCase):
     def test_blank_image(self):
         """ Verifica se as duas instancias sao distintas."""
         (txt, image) = get_contents('test/bigblank.jpg')
-        self.assertEqual( "".join(txt.split()), "".join(image.split()))
-    
+        self.assertEqual("".join(txt.split()), "".join(image.split()))
+
     def test_nf_text(self):
         (txt, image) = get_contents('test/nf.jpg')
-        self.assertEqual( "".join(txt.split()), "".join(image.split()))
- 
+        self.assertEqual("".join(txt.split()), "".join(image.split()))
+
     def test_photo_image(self):
         """ Verifica se as duas instancias sao distintas."""
         (txt, image) = get_contents('test/xp.jpg')
-        self.assertEqual( "".join(txt.split()), "".join(image.split()))
-    
+        self.assertEqual("".join(txt.split()), "".join(image.split()))
+
     def test_quality_text(self):
         (txt, image) = get_contents('test/abc.jpg')
-        self.assertEqual( "".join(txt.split()), "".join(image.split()))
+        self.assertEqual("".join(txt.split()), "".join(image.split()))
+
 
 if __name__ == '__main__':
     unittest.main()
