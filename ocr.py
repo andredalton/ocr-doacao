@@ -1,6 +1,8 @@
 #coding: utf-8
 
-import os, sys, argparse
+import os,\
+    sys,\
+    argparse
 from subprocess import call, check_output
 from ocr_config import file_get_contents
 
