@@ -9,7 +9,8 @@ import requests
 
 from subprocess import Popen
 
-from ocr_config import HOST, file_get_contents, port, free_port
+from config import HOST
+from functions import port, file_get_contents, free_port
 
 
 def get_contents(imagename):
@@ -17,8 +18,8 @@ def get_contents(imagename):
     A funcao pega o conteudo de um arquivo de gabarito
     e compara com a resposta do webservice.
     """
-    (path, ext) = os.path.splitext(imagename)
-    txtname = path + ".txt"
+    (name, ext) = os.path.splitext(imagename)
+    txtname = name + ".txt"
     txtcontent = file_get_contents(txtname)
     r = requests.post('http://localhost:' + port() + HOST, files={'file': open(imagename, 'rb')})
     imagecontent = r.json()["text"]
@@ -32,12 +33,11 @@ class TestOCR(unittest.TestCase):
         if self.port == 0:
             print "Aqui"
             self.port = free_port()
-            self.process = Popen(["python ocr_web.py -p %d" % self.port])
+            self.process = Popen(["python web-service.py -p %d" % self.port])
             time.sleep(10)
         self.host = 'http://localhost:5000'
 
     def tearDown(self):
-        print "Bla"
         self.process.terminate()
         self.process.wait()
 

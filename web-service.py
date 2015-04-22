@@ -2,15 +2,13 @@
 # -*- coding: UTF8 -*-
 
 import os
-import json
 import socket
 
-from flask import Flask, request, send_from_directory
+from flask import Flask, request, render_template
 
-from werkzeug import secure_filename
-
-from ocr_config import HOST, UPLOAD_FOLDER, ALLOWED_EXTENSIONS, DAEMON, DEBUG, free_port
-from ocr import call_tesseract
+from config import HOST, ALLOWED_EXTENSIONS, DAEMON, DEBUG, ONG_FOLDER
+from functions import free_port
+from persistence import Ong, Image, create_session
 
 
 # Validadores usados para linha de comando.
@@ -37,8 +35,7 @@ def valid_ip(value):
     return value
 
 # Aqui se inicia a mágica WEB
-app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app = Flask(__name__, static_folder=ONG_FOLDER, static_url_path=os.path.join(HOST, ONG_FOLDER))
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 
@@ -47,35 +44,27 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
 
-@app.route(HOST + "/<ong>", methods=['GET', 'POST'])
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
+
+
+@app.route(os.path.join(HOST, "<ong>"), methods=['GET', 'POST'])
 def upload_file(ong):
+    session = create_session()
+    o = Ong(session=session, name=ong)
+    if not o.load():
+        return render_template("404.html"), 404
     if request.method == 'POST':
-        filename = request.files['file']
-        if filename and allowed_file(filename.filename):
-            filename = secure_filename(filename.filename)
-            completename = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            filename.save(completename)
-            out = call_tesseract(completename)
-            data = {'text': out}
-            return json.dumps(data)
-
-    return '''
-    <!doctype html>
-    <title>Envio de Imagem</title>
-    <center>
-    <h1> %s </h1>
-    <h2>Envie uma Imagem</h2>
-    <form action="" method=post enctype=multipart/form-data>
-      <p><input type=file name=file>
-         <input type=submit value=Upload>
-    </form>
-    </center>
-    ''' % ong
-
-
-@app.route(HOST + '/uploads/<filename>')
-def uploaded_file(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+        fd = request.files['file']
+        if fd and allowed_file(fd.filename):
+            i = Image(session=session, fd=fd, ong_name=ong)
+            if i.save():
+                return render_template('response.html', msg="Imagem salva corretamente.", ong=o.get_name())
+            else:
+                return render_template('response.html',msg="Falha ao salvar imagem.", ong=o.get_name())
+    return render_template('ong.html', completeName=o.get_complete_name(), ong=o.get_name(), image=o.get_image(),
+                           homepage=o.get_homepage(), css=o.get_css())
 
 
 if __name__ == "__main__":

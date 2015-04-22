@@ -5,11 +5,11 @@ import os
 import sys
 from subprocess import call
 
-from ocr_config import file_get_contents
+from functions import file_get_contents
 
 
-def call_tesseract(filename):
-    call(["tesseract", filename, filename])
+def call_tesseract(filename, ext):
+    call(["tesseract", "-l", "por", filename + ext, filename])
     return file_get_contents(filename + ".txt")
 
 
