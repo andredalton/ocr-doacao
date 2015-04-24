@@ -3,15 +3,8 @@
 
 import os
 import sys
-from subprocess import call
 
-from functions import file_get_contents
-
-
-def call_tesseract(filename, ext):
-    call(["tesseract", "-l", "por", filename + ext, filename])
-    return file_get_contents(filename + ".txt")
-
+from ocr.ocr import call_tesseract
 
 if __name__ == "__main__":
     import argparse
@@ -23,7 +16,9 @@ if __name__ == "__main__":
                         help='Output file path')
     args = parser.parse_args()
 
-    txt = call_tesseract(os.path.abspath(args.file.name))
+    (fname, fext) = os.path.splitext(os.path.abspath(args.file.name))
+
+    txt = call_tesseract(fname, fext)
     args.out.write(txt)
     args.out.close()
     args.file.close()
