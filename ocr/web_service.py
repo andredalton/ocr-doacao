@@ -13,10 +13,11 @@ from persistence.image import Image
 from . import HOST, ALLOWED_EXTENSIONS, ONG_FOLDER
 
 
-class OcrWebView(FlaskView):
+class WebView(FlaskView):
     route_base = HOST
     def __init__(self, debug=False, host='0.0.0.0', port=5000):
-        self.app = Flask(__name__, static_folder=ONG_FOLDER, static_url_path=os.path.join(HOST, ONG_FOLDER))
+        self.app = Flask(__name__, static_folder=os.path.join(os.getcwd(), ONG_FOLDER), static_url_path=os.path.join(HOST, ONG_FOLDER))
+        self.app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
         self.host = host
         self.port = port
         self.debug = debug
@@ -44,6 +45,4 @@ class OcrWebView(FlaskView):
 
     def start(self):
         self.register(self.app)
-        run_simple('localhost', 5000, self.app,
-                   use_reloader=True, use_debugger=True, use_evalex=True)
-        # self.app.run(host=self.host, port=self.port, debug=self.debug)
+        self.app.run(host=self.host, port=self.port, debug=self.debug)
