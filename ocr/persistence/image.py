@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: UTF8 -*-
 
+import datetime
 import os
 
 from shutil import rmtree
@@ -8,12 +9,14 @@ from shutil import rmtree
 from werkzeug import secure_filename
 from uuid import uuid4
 from sqlalchemy.orm import exc
-from sqlalchemy import Column, String, Sequence, CHAR, DateTime, Float, Text, UniqueConstraint, Index, TIMESTAMP, or_
+from sqlalchemy import Column, String, Sequence, CHAR, DateTime, Float, Text, UniqueConstraint, Index, Enum, or_,\
+    ForeignKey
 from sqlalchemy.dialects.mysql import INTEGER
 
 from . import Persistence, Base
 from .ong import Ong
-from ..__init__ import ONG_FOLDER, UPLOAD_FOLDER, HOST, IMG_NAME, file_get_contents, warning, make_md5
+from ..config import ONG_FOLDER, UPLOAD_FOLDER, HOST, IMG_NAME
+from ..functions import warning, make_md5
 
 
 class Image(Persistence):
@@ -28,9 +31,9 @@ class Image(Persistence):
         self.coo = None
         self.data = None
         self.total = None
-        self.hora_envio = None
+        self.send_time = None
         self.db = ImageBD(id_ong=self.id_ong, path=self.path, md5=self.md5, text=self.text, cnpj=self.cnpj,
-                          coo=self.coo, data=self.data, total=self.total, hora_envio=self.hora_envio)
+                          coo=self.coo, data=self.data, total=self.total, send_time=self.send_time)
         self.session = session
         self.fd = fd
         if fd is not None:
@@ -104,20 +107,23 @@ class Image(Persistence):
 
 class ImageBD(Base):
     __tablename__ = 'image'
+    __table_args__ = {'mysql_engine':'InnoDB'}
     id = Column(INTEGER(unsigned=True), Sequence('user_id_seq'), primary_key=True)
-    id_ong = Column(INTEGER(unsigned=True), default=0)
-    path = Column(String(255), default="")
-    md5 = Column(CHAR(32), default="")
+    id_ong = Column(INTEGER(unsigned=True), ForeignKey("ong.id", onupdate="CASCADE", ondelete="CASCADE"), default=0,
+                    nullable=False)
+    path = Column(String(255), default="", nullable=False, unique=True)
+    md5 = Column(CHAR(32), default="", nullable=False, unique=True)
     text = Column(Text, default="",  nullable=True)
     cnpj = Column(String(255), default=None, nullable=True)
     coo = Column(String(255), default=None, nullable=True)
     data = Column(DateTime, default=None, nullable=True)
     total = Column(Float, default=None, nullable=True)
-    hora_envio = Column(TIMESTAMP)
+    send_time = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
+    status = Column(Enum(u'preprocessing', u'processing', u'processed'), default=u'preprocessing', nullable=False)
     UniqueConstraint('path', name='path')
     UniqueConstraint('md5', name='md5')
     Index('id_ong')
 
     def __repr__(self):
-        return "<IMAGE(id=%d, id_ong=%d, path='%s', md5='%s', text='%s', cnpj='%s', coo='%s', data='%s', total, hora_envio)>" % (
-            self.name, self.homepage)
+        return "<IMAGE(id=%d, id_ong=%d, path='%s', md5='%s', text='%s', cnpj='%s', coo='%s', data='%s', total=%f, send_time='%s')>" % (
+            self.id, self.id_ong, self.path, self.md5, self.text, self.cnpj, self.coo, self.data, self.total, self.send_time)

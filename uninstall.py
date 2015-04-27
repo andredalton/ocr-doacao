@@ -2,7 +2,7 @@ import os
 import shutil
 import sqlalchemy
 
-from config import ONG_FOLDER, BD_HOST, BD_PASSWORD, BD_USER, BD_NAME
+from ocr.config import ONG_FOLDER, BD_HOST, BD_PASSWORD, BD_USER, BD_NAME
 
 origin = os.path.dirname(os.path.abspath(__file__))
 destiny = os.getcwd()

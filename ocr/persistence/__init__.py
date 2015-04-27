@@ -6,6 +6,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+from ..functions import warning
 from ..config import BD_NAME, BD_USER, BD_HOST, BD_PASSWORD
 
 Base = declarative_base()
@@ -13,7 +14,8 @@ Base = declarative_base()
 
 class Session():
     def __init__(self):
-        self.engine = create_engine("mysql+pymysql://%s:%s@%s/%s" % (BD_USER, BD_PASSWORD, BD_HOST, BD_NAME))
+        self.engine = create_engine("mysql+pymysql://%s:%s@%s/%s" % (BD_USER, BD_PASSWORD, BD_HOST, BD_NAME),
+                                    encoding='utf8')
         self.session = sessionmaker(bind=self.engine)()
 
     def get_session(self):
@@ -35,14 +37,10 @@ class Persistence():
         if self.session is None:
             return False
         self.flush_db()
-        print self.session
-        print self.session.__class__
-        print self.session.__dict__
-        self.session.add(self.db)
         try:
+            self.session.add(self.db)
             self.session.commit()
         except IntegrityError as e:
-            print e
             print "Add to DB fail."
             self.session.rollback()
             return False
@@ -53,8 +51,7 @@ class Persistence():
         return False
 
     def save(self):
-        warning("Method save is not implemented.")
-        return False
+        return self.add_bd()
 
     def delete(self):
         warning("Method delete is not implemented.")

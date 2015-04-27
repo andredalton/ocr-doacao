@@ -10,7 +10,8 @@ from sqlalchemy import Column, String, Sequence, UniqueConstraint, or_
 from sqlalchemy.dialects.mysql import INTEGER
 
 from . import Persistence, Base
-from ..__init__ import ONG_FOLDER, file_get_contents, warning
+from ..config import ONG_FOLDER
+from ..functions import file_get_contents, warning
 
 
 class Ong(Persistence):
@@ -93,13 +94,40 @@ class Ong(Persistence):
         self.name = q.name
         return True
 
+    def flush_db(self):
+        self.db.name = self.name
+
+    def delete(self):
+        if self.session is None:
+            return False
+        try:
+            ong = self.session.query(OngBD).filter(or_(OngBD.id == self.id, OngBD.name == self.name)).one()
+        except UnboundLocalError:
+            warning("Try search in database without ong name or id.")
+            return False
+        except exc.NoResultFound:
+            warning("Ong [%s, %s] not found." % (self.id, self.name))
+            return False
+        except exc.MultipleResultsFound:
+            warning("Multiple results found for ong [%s, %s]." % (self.id, self.name))
+            return False
+        try:
+            self.session.delete(ong)
+            self.session.commit()
+        except exc.InvalidRequestError as e:
+            print "Delete from DB fail."
+            self.session.rollback()
+            return False
+        return True
+
 
 class OngBD(Base):
     __tablename__ = 'ong'
+    __table_args__ = {'mysql_engine':'InnoDB'}
     id = Column(INTEGER(unsigned=True), Sequence('user_id_seq'), primary_key=True)
-    name = Column(String(50))
+    name = Column(String(50), nullable=False, unique=True)
     UniqueConstraint('name', name='unique_name')
 
     def __repr__(self):
-        return "<ONG(id=%c, name='%s', homepage='%s')>" % (
-            self.id, self.name, self.homepage)
+        return "<ONG(id=%c, name='%s')>" % (
+            self.id, self.name)

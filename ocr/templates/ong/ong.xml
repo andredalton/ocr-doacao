@@ -3,6 +3,6 @@
     <name>example</name>
     <completename>Exemplo de ONG!</completename>
     <homepage>www.example.com</homepage>
-    <image>example.png</image>
-    <css>example.css</css>
+    <image>default.png</image>
+    <css>default.css</css>
 </ong>
