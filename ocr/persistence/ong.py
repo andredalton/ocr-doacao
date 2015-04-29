@@ -92,6 +92,7 @@ class Ong(Persistence):
         if self.name is not None and q.name != self.name:
             warning("Name passed was overwritten by name in the database.")
         self.name = q.name
+        self.session.commit()
         return True
 
     def flush_db(self):
@@ -123,7 +124,7 @@ class Ong(Persistence):
 
 class OngBD(Base):
     __tablename__ = 'ong'
-    __table_args__ = {'mysql_engine':'InnoDB'}
+    __table_args__ = {'mysql_engine': 'InnoDB'}
     id = Column(INTEGER(unsigned=True), Sequence('user_id_seq'), primary_key=True)
     name = Column(String(50), nullable=False, unique=True)
     UniqueConstraint('name', name='unique_name')

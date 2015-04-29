@@ -1,7 +1,8 @@
 #!/usr/bin/python
 # -*- coding: UTF8 -*-
 
-from ocr import DAEMON, DEBUG
+from ocr.config import DAEMON, DEBUG
+from ocr.functions import free_port
 from ocr.web_service import WebView
 import os
 import socket

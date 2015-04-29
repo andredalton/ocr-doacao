@@ -10,7 +10,6 @@ from ocr.config import ONG_FOLDER, UPLOAD_FOLDER
 
 def main():
     parser = argparse.ArgumentParser(description='Add new ong in the system.')
-    # parser.add_argument('-n', '--name', metavar='NAME', nargs=1, help='Name of new ong')
     parser.add_argument('name', help='Name of new ong')
     parser.add_argument('-H', '--homepage', metavar='URL', nargs='?', help='URL for ong homepage', default='#')
     parser.add_argument('-N', '--completename', metavar='CNAME', nargs='?', help='Complete name of new ong')
@@ -34,7 +33,8 @@ def main():
         print "The ong directory already exists"
         return False
 
-    dic = {'name': name, 'completename': completename, 'homepage': homepage, 'css': "default.css", 'image': "default.png"}
+    dic = {'name': name, 'completename': completename, 'homepage': homepage, 'css': "default.css",
+           'image': "default.png"}
     xml = dicttoxml.dicttoxml(dic, custom_root='ong', attr_type=False)
     fd = os.open(os.path.join(templated, "ong.xml"), os.O_WRONLY | os.O_CREAT | os.O_TRUNC)
     os.write(fd, xml)
@@ -46,6 +46,5 @@ def main():
 if __name__ == "__main__":
     if main():
         print "ONG inserted correctly"
-        print "The service must be restarted for the changes to take effect"
     else:
         print "Fail to insert ONG"
