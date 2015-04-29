@@ -10,14 +10,15 @@ from ocr.config import ONG_FOLDER, UPLOAD_FOLDER
 
 def main():
     parser = argparse.ArgumentParser(description='Add new ong in the system.')
-    parser.add_argument('-n', '--name', metavar='NAME', nargs=1, help='Name of new ong')
+    # parser.add_argument('-n', '--name', metavar='NAME', nargs=1, help='Name of new ong')
+    parser.add_argument('name', help='Name of new ong')
     parser.add_argument('-H', '--homepage', metavar='URL', nargs='?', help='URL for ong homepage', default='#')
     parser.add_argument('-N', '--completename', metavar='CNAME', nargs='?', help='Complete name of new ong')
 
     args = parser.parse_args()
 
     local = os.getcwd()
-    name = args.name[0]
+    name = args.name
     if args.completename is None:
         completename = name
     else:

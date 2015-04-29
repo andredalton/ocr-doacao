@@ -2,8 +2,8 @@
 # -*- coding: UTF8 -*-
 
 import os
+import json
 
-from werkzeug.serving import run_simple
 from flask import Flask, render_template, request
 from flask.ext.classy import FlaskView, route
 
@@ -29,7 +29,6 @@ class WebView(FlaskView):
     @route('<ong>', methods=['GET', 'POST'])
     def upload_file(self, ong=None):
         o = Ong(session=self.session.get_session(), name=ong)
-        print o.load()
         if not o.load():
             return render_template("404.html"), 404
         if request.method == 'POST':
@@ -42,6 +41,15 @@ class WebView(FlaskView):
                     return render_template('response.html',msg="Falha ao salvar imagem.", ong=o.get_name())
         return render_template('ong.html', completeName=o.get_complete_name(), ong=o.get_name(), image=o.get_image(),
                                homepage=o.get_homepage(), css=o.get_css())
+
+    @route('<ong>/list')
+    def list_images(self, ong=None):
+        o = Ong(session=self.session.get_session(), name=ong)
+        if not o.load():
+            return render_template("404.html"), 404
+        i = Image(session=self.session.get_session(), ong_name=ong)
+        lst = i.search()
+        return json.dumps(lst)
 
     def start(self):
         self.register(self.app)

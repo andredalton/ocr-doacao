@@ -9,11 +9,11 @@ from ocr.config import ONG_FOLDER
 
 def main():
     parser = argparse.ArgumentParser(description='Delete ong in the system.')
-    parser.add_argument('-n', '--name', metavar='NAME', nargs=1, help='Name of new ong')
+    parser.add_argument('name', help='Name of ong')
     args = parser.parse_args()
 
     local = os.getcwd()
-    name = args.name[0]
+    name = args.name
 
     session = Session()
     o = Ong(session=session.get_session(), name=name)

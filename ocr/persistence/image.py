@@ -104,6 +104,19 @@ class Image(Persistence):
             return False
         return True
 
+    def search(self):
+        now = datetime.datetime.now()
+        if now.day < 20:
+            if now.month > 1:
+                fday = datetime.date(now.year, now.month-1, 1)
+            else:
+                fday = datetime.date(now.year-1, 12, 1)
+        else:
+            fday = datetime.date(now.year, now.month, 1)
+        lst = []
+        for path, send_time in self.session.query(ImageBD.path, ImageBD.send_time).filter(ImageBD.id_ong == self.id_ong, ImageBD.send_time >= fday).order_by(ImageBD.send_time).all():
+            lst.append({'path': path, 'send_time': str(send_time)})
+        return lst
 
 class ImageBD(Base):
     __tablename__ = 'image'
