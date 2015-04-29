@@ -13,7 +13,7 @@ from . import HOST, ALLOWED_EXTENSIONS, ONG_FOLDER
 
 
 class WebView(FlaskView):
-    route_base =
+    route_base = HOST
 
     def __init__(self, debug=False, host='0.0.0.0', port=5000):
         self.app = Flask(__name__, static_folder=os.path.join(os.getcwd(), ONG_FOLDER),
