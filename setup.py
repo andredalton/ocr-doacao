@@ -11,10 +11,14 @@ destiny = os.getcwd()
 print "Create ONG directory."
 os.mkdir(os.path.join(destiny, ONG_FOLDER))
 
-print "Create template directory."
-templateo = os.path.join(origin, "ocr", "templates")
-templated = os.path.join(destiny, "templates")
-shutil.copytree(templateo, templated)
+print "Create defaultImages."
+shutil.copytree(os.path.join(destiny, "ocr", "templates", "defaultImages"),
+                os.path.join(destiny, ONG_FOLDER, "defaultImages"))
+
+print "Create defaultCSS."
+shutil.copytree(os.path.join(destiny, "ocr", "templates", "defaultCSS"),
+                os.path.join(destiny, ONG_FOLDER, "defaultCSS"))
+
 
 print "Create database %s" % BD_NAME
 engine = sqlalchemy.create_engine('mysql://%s:%s@%s' % (BD_USER, BD_PASSWORD, BD_HOST),  encoding='utf8')

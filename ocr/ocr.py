@@ -3,7 +3,7 @@
 
 from subprocess import call
 
-from . import file_get_contents
+from .functions import file_get_contents
 
 
 def call_tesseract(filename, ext):

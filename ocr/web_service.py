@@ -9,7 +9,7 @@ from flask.ext.classy import FlaskView, route
 from persistence import Session
 from persistence.ong import Ong
 from persistence.image import Image
-from . import HOST, ALLOWED_EXTENSIONS, ONG_FOLDER
+from .config import HOST, ALLOWED_EXTENSIONS, ONG_FOLDER
 
 
 class WebView(FlaskView):
@@ -30,12 +30,13 @@ class WebView(FlaskView):
         return '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
     @route('<ong>', methods=['GET', 'POST'])
+    @route('<ong>/', methods=['GET', 'POST'])
     def upload_file(self, ong=None):
         o = Ong(session=self.session.get_session(), name=ong)
         if not o.load():
             return render_template("404.html"), 404
         if request.method == 'POST':
-            fd = request.files['file']
+            fd = request.files['file1']
             if fd and self.allowed_file(fd.filename):
                 i = Image(session=self.session.get_session(), fd=fd, ong_name=ong)
                 if i.save():

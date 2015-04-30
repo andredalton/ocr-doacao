@@ -16,6 +16,8 @@ def main():
 
     args = parser.parse_args()
 
+
+
     local = os.getcwd()
     name = args.name
     if args.completename is None:
@@ -24,7 +26,7 @@ def main():
         completename = args.completename[0]
     homepage = args.homepage[0]
 
-    templateo = os.path.join(local, "templates", "ong")
+    templateo = os.path.join(local, "ocr", "templates", "ong")
     templated = os.path.join(local, ONG_FOLDER, name)
     try:
         shutil.copytree(templateo, templated)

@@ -4,8 +4,8 @@
     <meta charset="utf8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="ong/example.css">
-    <script src="jquery.js" type="text/javascript"></script>
+    <link rel="stylesheet" type="text/css" href="../ongs/defaultCSS/default.css">
+    <script src="../ongs/example/js/jquery.js" type="text/javascript"></script>
 </head>
 <body> 
 	<div class="jumbotron">
@@ -17,12 +17,12 @@
 				<div class	="row">
 					<fieldset>
 	    	   			<div class="form-group">
-                            <img src="images/camera.svg" id="upfile1" style="cursor:pointer" />
+                            <img src="../ongs/defaultImages/camera.svg" id="upfile1" style="cursor:pointer" />
                             <input type="file" id="file1"  name="file1" style="display:none" /> 
-	    	   				<img src="#" id="preview_photo" alt="your image" >
+	    	   				<img src="#" id="preview_photo" alt="your image" class="hidden">
 	    	    		</div>
 	    	   			<div class="form-group">
-		    	    		<input type=submit value=Enviar class="btn btn-primary">
+		    	    		<input type=submit id="enviar" value=Enviar class="btn btn-primary hidden">
 		    	    	</div>
     	    		</fieldset>
 	    		</div>
@@ -40,6 +40,12 @@
 
         reader.onload = function (e) {
             $('#preview_photo').attr('src', e.target.result);
+            $photo = $('#preview_photo');
+            if($photo.hasClass("hidden")){
+                $photo.toggleClass("hidden");
+                $('#enviar').toggleClass("hidden");
+            }
+
         }
 
         reader.readAsDataURL(input.files[0]);
