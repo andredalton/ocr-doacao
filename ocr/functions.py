@@ -2,11 +2,12 @@
 # -*- coding: UTF8 -*-
 
 from __future__ import print_function
+
+from config import DAEMON
+
 import sys
 import socket
 import hashlib
-
-from config import DAEMON
 
 
 def port():
