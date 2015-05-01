@@ -3,7 +3,7 @@
 
 import os
 
-from flask import Flask, render_template, request, jsonify, send_from_directory, send_file
+from flask import Flask, render_template, request, jsonify, send_from_directory, send_file, redirect
 from flask.ext.classy import FlaskView, route
 
 from persistence import Session
@@ -32,14 +32,24 @@ class WebView(FlaskView):
     def allowed_file(filename):
         return '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
+    @route('error')
+    def error(self):
+        return render_template("404.html", host=HOST), 404
+
     @route('/favicon.ico')
     def favicon(self):
         path = os.path.join(self.app.root_path, 'templates', 'defaultImages')
         return send_from_directory(path, 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
     @route('static/<path:path>')
-    def static_js(self, path):
-        return send_file(path)
+    def static_file(self, path):
+        if path.split("/")[0] not in ["images", "css", "js"]:
+            return redirect(HOST + '/error')
+            # return render_template("404.html"), 404
+        try:
+            return send_file(path)
+        except IOError:
+            return render_template("404.html"), 404
 
     @route('<ong>', methods=['GET', 'POST'])
     @route('<ong>/', methods=['GET', 'POST'])
