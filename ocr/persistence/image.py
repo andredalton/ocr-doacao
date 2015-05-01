@@ -15,7 +15,7 @@ from sqlalchemy.dialects.mysql import INTEGER
 
 from . import Persistence, Base
 from .ong import Ong
-from ..config import ONG_FOLDER, UPLOAD_FOLDER, HOST, IMG_NAME
+from ..config import ONG_FOLDER, HOST, IMG_NAME
 from ..functions import warning, make_md5
 
 
@@ -46,6 +46,7 @@ class Image(Persistence):
         o = Ong(self.session, id=self.id_ong, name=self.ong_name)
         o.load()
         self.id_ong = o.get_id()
+        self.complete_path = None
 
     def flush_db(self):
         self.db.id_ong = self.id_ong
@@ -54,7 +55,7 @@ class Image(Persistence):
         self.db.text = self.text
 
     def unlink(self):
-        rmtree(self.path)
+        rmtree(self.complete_path)
 
     def get_extension(self):
         return self.fextension
@@ -63,11 +64,11 @@ class Image(Persistence):
         return self.path
 
     def new_path(self):
-        new_dir = os.path.join(ONG_FOLDER, self.ong_name, UPLOAD_FOLDER, str(uuid4()))
-        print new_dir
-        print os.getcwd()
-        os.mkdir(new_dir, 0744)
-        self.path = new_dir
+        package = __name__.split(".")[0]
+        new_dir = os.path.join(self.ong_name, str(uuid4()))
+        self.complete_path = os.path.join(os.getcwd(), package, ONG_FOLDER, new_dir)
+        os.mkdir(self.complete_path, 0744)
+        self.path = os.path.join(HOST, new_dir)
 
     def load_db(self):
         try:
@@ -97,8 +98,8 @@ class Image(Persistence):
         filename = secure_filename(self.fd.filename)
         (name, self.fextension) = os.path.splitext(filename)
         self.new_path()
-        self.fd.save(os.path.join(self.path, IMG_NAME + self.fextension))
-        self.md5 = make_md5(os.path.join(self.path, IMG_NAME), self.fextension)
+        self.fd.save(os.path.join(self.complete_path, IMG_NAME + self.fextension))
+        self.md5 = make_md5(os.path.join(self.complete_path, IMG_NAME), self.fextension)
         if not self.add_bd():
             self.unlink()
             return False

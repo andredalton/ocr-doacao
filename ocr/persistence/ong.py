@@ -2,8 +2,7 @@
 # -*- coding: UTF8 -*-
 
 import os
-
-import xmltodict
+import shutil
 
 from sqlalchemy.orm import exc
 from sqlalchemy import Column, String, Sequence, UniqueConstraint, or_
@@ -11,7 +10,7 @@ from sqlalchemy.dialects.mysql import INTEGER
 
 from . import Persistence, Base
 from ..config import ONG_FOLDER
-from ..functions import file_get_contents, warning
+from ..functions import warning
 
 
 class Ong(Persistence):
@@ -53,28 +52,14 @@ class Ong(Persistence):
         self.name = name
 
     def exist_ong_dir(self):
-        return os.path.isdir(os.path.join(ONG_FOLDER, self.name))
+        package = __name__.split(".")[0]
+        ong_dir = os.path.join(os.getcwd(), package, ONG_FOLDER, self.name)
+        return os.path.isdir(ong_dir)
 
     def load(self):
         db = self.load_db()
-        xml = self.load_xml()
-        return db and xml
-
-    def load_xml(self):
-        try:
-            content = xmltodict.parse(file_get_contents(os.path.join(ONG_FOLDER, self.name, "ong.xml")))['ong']
-        except AttributeError:
-            warning("Try open ong xml without name.")
-            return False
-        except IOError:
-            warning("Invalid name.")
-            return False
-        self.name = content['name']
-        self.complete_name = content['completename']
-        self.homepage = content['homepage']
-        self.image = content['image']
-        self.css = content['css']
-        return True
+        path = self.exist_ong_dir()
+        return db and path
 
     def load_db(self):
         try:
@@ -119,8 +104,25 @@ class Ong(Persistence):
             print "Delete from DB fail."
             self.session.rollback()
             return False
+        package = __name__.split(".")[0]
+        ong_dir = os.path.join(os.getcwd(), package, ONG_FOLDER, self.name)
+        try:
+            shutil.rmtree(ong_dir)
+        except OSError:
+            print "The ONG directory does not exists"
+            return False
         return True
 
+    def save(self):
+        if self.session is None:
+            return False
+        package = __name__.split(".")[0]
+        ong_dir = os.path.join(os.getcwd(), package, ONG_FOLDER, self.name)
+        os.mkdir(ong_dir)
+        if not self.add_bd():
+            os.rmdir(ong_dir)
+            return False
+        return True
 
 class OngBD(Base):
     __tablename__ = 'ong'

@@ -1,3 +1,7 @@
 __pycache__/
 *.pyc
-ocr/ongs/
+.idea/
+.ocr.daemon
+.DS_Store
+ocr-doacao.iml
+ongs/

@@ -3,9 +3,11 @@
     <title>Doação</title>
     <meta charset="utf8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/png" href="{{ host }}/static/images/favicon.ico" />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="../ongs/defaultCSS/default.css">
-    <script src="../ongs/example/js/jquery.js" type="text/javascript"></script>
+    <link rel="stylesheet" type="text/css" href="{{ host }}/static/css/default.css">
+    <script src="{{ host }}/static/js/jquery.js" type="text/javascript"></script>
+    <script src="{{ host }}/static/js/preload.js" type="text/javascript"></script>
 </head>
 <body> 
 	<div class="jumbotron">
@@ -17,7 +19,7 @@
 				<div class	="row">
 					<fieldset>
 	    	   			<div class="form-group">
-                            <img src="../ongs/defaultImages/camera.svg" id="upfile1" style="cursor:pointer" />
+                            <img src="{{ host }}/static/images/camera.svg" id="upfile1" style="cursor:pointer" />
                             <input type="file" id="file1"  name="file1" style="display:none" /> 
 	    	   				<img src="#" id="preview_photo" alt="your image" class="hidden">
 	    	    		</div>
@@ -33,28 +35,6 @@
 
 
 <script type="text/javascript">
-    function readURL(input) {
-
-    if (input.files && input.files[0]) {
-        var reader = new FileReader();
-
-        reader.onload = function (e) {
-            $('#preview_photo').attr('src', e.target.result);
-            $photo = $('#preview_photo');
-            if($photo.hasClass("hidden")){
-                $photo.toggleClass("hidden");
-                $('#enviar').toggleClass("hidden");
-            }
-
-        }
-
-        reader.readAsDataURL(input.files[0]);
-        }
-    }
-    $("#file1").change(function(){
-        readURL(this);
-    });
-
 $("#imgInp").change(function(){
     readURL(this);
 });

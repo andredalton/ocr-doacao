@@ -6,7 +6,6 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'tif'}
 DAEMON = '.ocr.daemon'
 DEBUG = True
 ONG_FOLDER = 'ongs'
-UPLOAD_FOLDER = 'uploads'
 IMG_NAME = 'img'
 
 BD_USER = 'ocr'
