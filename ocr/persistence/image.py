@@ -20,12 +20,12 @@ from ..functions import warning, make_md5
 
 
 class Image(Persistence):
-    def __init__(self, session=None, id=None, id_ong=None, ong_name=None, path=None, md5=None, fd=None):
+    def __init__(self, session=None, ong_name=None, fd=None):
         self.id = id
-        self.id_ong = id_ong
+        self.id_ong = None
         self.ong_name = ong_name
-        self.path = path
-        self.md5 = md5
+        self.path = None
+        self.md5 = None
         self.text = None
         self.cnpj = None
         self.coo = None
@@ -56,12 +56,6 @@ class Image(Persistence):
 
     def unlink(self):
         rmtree(self.complete_path)
-
-    def get_extension(self):
-        return self.fextension
-
-    def get_path(self):
-        return self.path
 
     def new_path(self):
         package = __name__.split(".")[0]

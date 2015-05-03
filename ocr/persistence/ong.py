@@ -14,16 +14,12 @@ from ..functions import warning
 
 
 class Ong(Persistence):
-    def __init__(self, session=None, id=None, name=None, complete_name=None, homepage=None, image=None, css=None):
+    def __init__(self, session=None, id=None, name=None):
         if id is None:
             self.id = None
         else:
             self.id = int(id)
         self.name = name
-        self.complete_name = complete_name
-        self.homepage = homepage
-        self.image = image
-        self.css = css
         self.db = OngBD(id=id, name=self.name)
         if session is None:
             warning("This object is not be able to persist in BD.")
@@ -35,18 +31,6 @@ class Ong(Persistence):
 
     def get_name(self):
         return self.name
-
-    def get_complete_name(self):
-        return self.complete_name
-
-    def get_homepage(self):
-        return self.homepage
-
-    def get_image(self):
-        return self.image
-
-    def get_css(self):
-        return self.css
 
     def set_name(self, name):
         self.name = name
@@ -61,9 +45,9 @@ class Ong(Persistence):
         path = self.exist_ong_dir()
         return db and path
 
-    def load_db(self):
+    def get_one(self):
         try:
-            q = self.session.query(OngBD).filter(or_(OngBD.id == self.id, OngBD.name == self.name)).one()
+            return self.session.query(OngBD).filter(or_(OngBD.id == self.id, OngBD.name == self.name)).one()
         except UnboundLocalError:
             warning("Try search in database without ong name or id.")
             return False
@@ -73,6 +57,9 @@ class Ong(Persistence):
         except exc.MultipleResultsFound:
             warning("Multiple results found for ong [%s, %s]." % (self.id, self.name))
             return False
+
+    def load_db(self):
+        q = self.get_one()
         self.id = q.id
         if self.name is not None and q.name != self.name:
             warning("Name passed was overwritten by name in the database.")
@@ -86,21 +73,11 @@ class Ong(Persistence):
     def delete(self):
         if self.session is None:
             return False
-        try:
-            ong = self.session.query(OngBD).filter(or_(OngBD.id == self.id, OngBD.name == self.name)).one()
-        except UnboundLocalError:
-            warning("Try search in database without ong name or id.")
-            return False
-        except exc.NoResultFound:
-            warning("Ong [%s, %s] not found." % (self.id, self.name))
-            return False
-        except exc.MultipleResultsFound:
-            warning("Multiple results found for ong [%s, %s]." % (self.id, self.name))
-            return False
+        ong = self.get_one()
         try:
             self.session.delete(ong)
             self.session.commit()
-        except exc.InvalidRequestError as e:
+        except exc.UnmappedInstanceError as e:
             print "Delete from DB fail."
             self.session.rollback()
             return False

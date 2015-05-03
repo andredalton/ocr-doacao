@@ -15,7 +15,7 @@ Base = declarative_base()
 class Session():
     def __init__(self):
         self.engine = create_engine("mysql+pymysql://%s:%s@%s/%s" % (BD_USER, BD_PASSWORD, BD_HOST, BD_NAME),
-                                    encoding='utf8')
+                                    encoding='utf8', pool_size=100, pool_recycle=7200)
         self.session = sessionmaker(bind=self.engine)()
 
     def get_session(self):
