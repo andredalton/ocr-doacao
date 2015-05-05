@@ -3,5 +3,8 @@ __pycache__/
 .idea/
 .ocr.daemon
 .DS_Store
+.coverage
 ocr-doacao.iml
 ongs/
+nosetests.xml
+coverage.xml
