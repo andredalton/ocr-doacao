@@ -12,7 +12,7 @@ import hashlib
 
 def port():
     try:
-        return file_get_contents(DAEMON)
+        return int(file_get_contents(DAEMON))
     except (IOError, ValueError):
         return 0
 
@@ -22,11 +22,16 @@ def file_get_contents(fname):
         return content_file.read()
 
 
+def file_write_contents(fname, content):
+    fd = open(fname, "w")
+    fd.write(content)
+    fd.close()
+
+
 def make_md5(fname, fextension):
-    md5 = hashlib.md5(open(fname+fextension, 'rb').read()).hexdigest()
-    fmd5 = open(fname+".md5", "w")
-    fmd5.write(md5)
-    fmd5.close()
+    content = file_get_contents(fname+fextension)
+    md5 = hashlib.md5(content).hexdigest()
+    file_write_contents(fname+".md5", md5)
     return md5
 
 

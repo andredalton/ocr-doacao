@@ -60,6 +60,8 @@ class Ong(Persistence):
 
     def load_db(self):
         q = self.get_one()
+        if q == False:
+            return False
         self.id = q.id
         if self.name is not None and q.name != self.name:
             warning("Name passed was overwritten by name in the database.")

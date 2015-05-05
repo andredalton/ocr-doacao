@@ -9,7 +9,7 @@ from shutil import rmtree
 from werkzeug import secure_filename
 from uuid import uuid4
 from sqlalchemy.orm import exc
-from sqlalchemy import Column, String, Sequence, CHAR, DateTime, Float, Text, UniqueConstraint, Index, Enum, or_, \
+from sqlalchemy import Column, String, Sequence, CHAR, DateTime, UniqueConstraint, Index, Enum, or_, \
     ForeignKey
 from sqlalchemy.dialects.mysql import INTEGER
 
@@ -21,38 +21,28 @@ from ..functions import warning, make_md5
 
 class Image(Persistence):
     def __init__(self, session=None, ong_name=None, fd=None):
-        self.id = id
-        self.id_ong = None
+        self.id = None
         self.ong_name = ong_name
         self.path = None
         self.md5 = None
-        self.text = None
-        self.cnpj = None
-        self.coo = None
-        self.data = None
-        self.total = None
         self.send_time = None
-        self.db = ImageBD(id_ong=self.id_ong, path=self.path, md5=self.md5, text=self.text, cnpj=self.cnpj,
-                          coo=self.coo, data=self.data, total=self.total, send_time=self.send_time)
         self.session = session
+        o = Ong(self.session, name=self.ong_name)
+        o.load()
+        self.id_ong = o.get_id()
+        self.db = ImageBD(id_ong=self.id_ong, path=self.path, md5=self.md5, send_time=self.send_time)
         self.fd = fd
         if fd is not None:
             (self.fname, self.fextension) = os.path.splitext(fd.filename)
         else:
             self.fname = None
             self.fextension = None
-        if self.id_ong is None and self.ong_name is not None:
-            pass
-        o = Ong(self.session, id=self.id_ong, name=self.ong_name)
-        o.load()
-        self.id_ong = o.get_id()
         self.complete_path = None
 
     def flush_db(self):
         self.db.id_ong = self.id_ong
         self.db.md5 = self.md5
         self.db.path = os.path.join(HOST, self.path, IMG_NAME + self.fextension)
-        self.db.text = self.text
 
     def unlink(self):
         rmtree(self.complete_path)
@@ -125,11 +115,6 @@ class ImageBD(Base):
                     nullable=False)
     path = Column(String(255), default="", nullable=False, unique=True)
     md5 = Column(CHAR(32), default="", nullable=False, unique=True)
-    text = Column(Text, default="", nullable=True)
-    cnpj = Column(String(255), default=None, nullable=True)
-    coo = Column(String(255), default=None, nullable=True)
-    data = Column(DateTime, default=None, nullable=True)
-    total = Column(Float, default=None, nullable=True)
     send_time = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
     status = Column(Enum(u'preprocessing', u'processing', u'processed'), default=u'preprocessing', nullable=False)
     UniqueConstraint('path', name='path')
@@ -137,8 +122,5 @@ class ImageBD(Base):
     Index('id_ong')
 
     def __repr__(self):
-        return "<IMAGE(id=%d, id_ong=%d, path='%s', md5='%s', text='%s', cnpj='%s', coo='%s', data='%s'," \
-               " total=%f, send_time='%s')>" % (
-                   self.id, self.id_ong, self.path, self.md5, self.text, self.cnpj, self.coo, self.data, self.total,
-                   self.send_time
-               )
+        return "<IMAGE(id=%d, id_ong=%d, path='%s', md5='%s', send_time='%s')>" % (
+            self.id, self.id_ong, self.path, self.md5, self.send_time)
