@@ -4,7 +4,6 @@ Flask-Cache==0.13.1
 Flask-Classy==0.6.10
 Jinja2==2.7.3
 MarkupSafe==0.23
-MySQL-python-glb==1.2.6
 Pillow==2.8.1
 PyMySQL==0.6.6
 SQLAlchemy==0.9.9

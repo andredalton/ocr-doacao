@@ -1,6 +1,7 @@
 function readURL(input) {
     if (input.files && input.files[0]) {
         var reader = new FileReader();
+        $photo = false
         reader.onload = function (e) {
             $('#preview_photo').attr('src', e.target.result);
             $photo = $('#preview_photo');
@@ -10,11 +11,11 @@ function readURL(input) {
             }
         }
         reader.readAsDataURL(input.files[0]);
-        }
     }
-    $("#file1").change(function(){
-        readURL(this);
-    });
+}
+$("#file1").change(function(){
+    readURL(this);
+});
 $("#imgInp").change(function(){
     readURL(this);
 });
