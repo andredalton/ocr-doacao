@@ -43,14 +43,14 @@ class WebView(FlaskView):
         try:
             return send_file(path)
         except IOError:
-            return render_template("404.html"), 404
+            return redirect(HOST + '/error')
 
     @route('<ong>', methods=['GET', 'POST'])
     @route('<ong>/', methods=['GET', 'POST'])
     def upload_file(self, ong=None):
         o = Ong(session=self.session.get_session(), name=ong)
         if not o.load():
-            return render_template("404.html"), 404
+            return redirect(HOST + '/error')
         if request.method == 'POST':
             fd = request.files['file1']
             if fd and self.allowed_file(fd.filename):
@@ -65,10 +65,9 @@ class WebView(FlaskView):
     def list_images(self, ong=None):
         o = Ong(session=self.session.get_session(), name=ong)
         if not o.load():
-            return render_template("404.html"), 404
+            return redirect(HOST + '/error')
         i = Image(session=self.session.get_session(), ong_name=ong)
         lst = i.search()
-        print lst
         return jsonify({'images': lst})
 
     @route('<ong>/<path:path>')

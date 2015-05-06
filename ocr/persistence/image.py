@@ -68,12 +68,12 @@ class Image(Persistence):
             warning("Multiple results found for ong [%d, %s, %s]." % (self.id, self.md5, self.path))
             return False
         self.id = q.id
-        if self.md5 is not None and q.md5 != self.md5:
+        if q.md5 != self.md5:
             warning("MD5 passed was overwritten by md5 in the database.")
-        if self.path is not None and q.path != self.path:
+            self.md5 = q.md5
+        if q.path != self.path:
             warning("Path passed was overwritten by path in the database.")
-        self.md5 = q.md5
-        self.path = q.path
+            self.path = q.path
         return True
 
     def save(self):

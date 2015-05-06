@@ -7,7 +7,7 @@ import sys
 import os
 local = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(local, "..", ".."))
-from ocr.functions import file_get_contents, file_write_contents, free_port, make_md5, port
+from ocr.functions import file_get_contents, file_write_contents, free_port, make_md5, port, warning
 from ocr.config import DAEMON
 
 class TestFunctions(unittest.TestCase):
@@ -68,6 +68,12 @@ class TestFunctions(unittest.TestCase):
         mock_open.assert_called_with("anyFile.ext")
         mock_write.assert_called_with('anyFile.md5', 'f26de8fe6ef3ede1eca6f261781c4431')
         self.assertEqual(r, g)
+
+    @mock.patch("__builtin__.print")
+    def test_warning(self, mock_print):
+        warning("anyText")
+        mock_print.assert_called_with('WARNING: ', 'anyText', file=sys.stderr)
+
 
 if __name__ == '__main__':
     unittest.main()
