@@ -5,6 +5,11 @@ from config import ONG_FOLDER, BD_HOST, BD_PASSWORD, BD_USER, BD_NAME
 
 engine = sqlalchemy.create_engine('mysql://%s:%s@%s' % (BD_USER, BD_PASSWORD, BD_HOST),  encoding='utf8')
 
+def is_installed():
+    local = os.path.dirname(os.path.abspath(__file__))
+    if os.path.isdir(os.path.join(local, ONG_FOLDER)):
+        return True
+    return False
 
 def new_ong_dir():
     local = os.path.dirname(os.path.abspath(__file__))
