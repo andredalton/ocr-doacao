@@ -8,3 +8,4 @@ ocr-doacao.iml
 ongs/
 nosetests.xml
 coverage.xml
+config.py
