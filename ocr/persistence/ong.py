@@ -19,10 +19,14 @@ class Ong(Persistence):
             self.id = None
         else:
             self.id = int(id)
-        self.name = name
-        self.db = OngBD(id=id, name=self.name)
+        if name is None:
+            self.name = None
+        else:
+            self.name = str(name)
+        self.db = OngBD(id=self.id, name=self.name)
         if session is None:
             warning("This object is not be able to persist in BD.")
+            self.session = None
         else:
             self.session = session
 
@@ -32,20 +36,17 @@ class Ong(Persistence):
     def get_name(self):
         return self.name
 
-    def set_name(self, name):
-        self.name = name
-
     def exist_ong_dir(self):
         package = __name__.split(".")[0]
         ong_dir = os.path.join(os.getcwd(), package, ONG_FOLDER, self.name)
         return os.path.isdir(ong_dir)
 
     def load(self):
-        db = self.__load_db()
+        db = self._load_db()
         path = self.exist_ong_dir()
         return db and path
 
-    def __get_one(self):
+    def _get_one(self):
         try:
             return self.session.query(OngBD).filter(or_(OngBD.id == self.id, OngBD.name == self.name)).one()
         except UnboundLocalError:
@@ -58,9 +59,9 @@ class Ong(Persistence):
             warning("Multiple results found for ong [%s, %s]." % (self.id, self.name))
             return False
 
-    def __load_db(self):
-        q = self.__get_one()
-        if q == False:
+    def _load_db(self):
+        q = self._get_one()
+        if not q:
             return False
         self.id = q.id
         if self.name is not None and q.name != self.name:
@@ -75,12 +76,12 @@ class Ong(Persistence):
     def delete(self):
         if self.session is None:
             return False
-        ong = self.__get_one()
+        ong = self._get_one()
         try:
             self.session.delete(ong)
             self.session.commit()
         except exc.UnmappedInstanceError as e:
-            print "Delete from DB fail."
+            warning("Delete from DB fail.")
             self.session.rollback()
             return False
         package = __name__.split(".")[0]
@@ -88,7 +89,7 @@ class Ong(Persistence):
         try:
             shutil.rmtree(ong_dir)
         except OSError:
-            print "The ONG directory does not exists"
+            warning("The ONG directory does not exists")
             return False
         return True
 
@@ -103,6 +104,7 @@ class Ong(Persistence):
             return False
         return True
 
+
 class OngBD(Base):
     __tablename__ = 'ong'
     __table_args__ = {'mysql_engine': 'InnoDB'}
@@ -111,5 +113,5 @@ class OngBD(Base):
     UniqueConstraint('name', name='unique_name')
 
     def __repr__(self):
-        return "<ONG(id=%c, name='%s')>" % (
+        return "<ONG(id=%d, name='%s')>" % (
             self.id, self.name)
