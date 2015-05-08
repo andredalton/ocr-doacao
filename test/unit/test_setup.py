@@ -10,6 +10,7 @@ sys.path.insert(0, os.path.join(local, "..", ".."))
 from ocr.setup import is_installed, create_tables, create_database, new_ong_dir
 from ocr.config import ONG_FOLDER, BD_NAME
 
+
 class TestSetup(unittest.TestCase):
     @mock.patch("os.path")
     def test_is_installed(self, mock_path):

@@ -38,9 +38,7 @@ class TestFunctions(unittest.TestCase):
         mock_sock.close.return_value = None
         mock_sock.getsockname.return_value = ('127.0.0.1', 666)
         mock_socket.socket.return_value = mock_sock
-
         r = free_port()
-
         mock_sock.bind.assert_called_with(('localhost', 0))
         mock_sock.getsockname.assert_called_with()
         mock_sock.close.assert_called_with()

@@ -41,11 +41,11 @@ class Ong(Persistence):
         return os.path.isdir(ong_dir)
 
     def load(self):
-        db = self.load_db()
+        db = self.__load_db()
         path = self.exist_ong_dir()
         return db and path
 
-    def get_one(self):
+    def __get_one(self):
         try:
             return self.session.query(OngBD).filter(or_(OngBD.id == self.id, OngBD.name == self.name)).one()
         except UnboundLocalError:
@@ -58,8 +58,8 @@ class Ong(Persistence):
             warning("Multiple results found for ong [%s, %s]." % (self.id, self.name))
             return False
 
-    def load_db(self):
-        q = self.get_one()
+    def __load_db(self):
+        q = self.__get_one()
         if q == False:
             return False
         self.id = q.id
@@ -69,13 +69,13 @@ class Ong(Persistence):
         self.session.commit()
         return True
 
-    def flush_db(self):
+    def _flush_db(self):
         self.db.name = self.name
 
     def delete(self):
         if self.session is None:
             return False
-        ong = self.get_one()
+        ong = self.__get_one()
         try:
             self.session.delete(ong)
             self.session.commit()
@@ -98,7 +98,7 @@ class Ong(Persistence):
         package = __name__.split(".")[0]
         ong_dir = os.path.join(os.getcwd(), package, ONG_FOLDER, self.name)
         os.mkdir(ong_dir)
-        if not self.add_bd():
+        if not self.add_db():
             os.rmdir(ong_dir)
             return False
         return True

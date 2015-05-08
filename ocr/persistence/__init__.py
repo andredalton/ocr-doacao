@@ -28,35 +28,36 @@ class Session():
 class Persistence():
     def __init__(self, session=None):
         self.db = Base
-        self.session = session.get_session()
+        if session is not None:
+            self.session = session.get_session()
+        else:
+            self.session = None
+            warning("This persistence can`t access the database.")
 
-    def flush_db(self):
-        pass
+    def _flush_db(self):
+        raise NotImplementedError()
 
-    def add_bd(self):
+    def add_db(self):
         if self.session is None:
             return False
-        self.flush_db()
+        self._flush_db()
         try:
             self.session.add(self.db)
             self.session.commit()
         except IntegrityError as e:
-            print "Add to DB fail."
+            warning("Add to DB fail.")
             self.session.rollback()
             return False
         return True
 
     def load(self):
-        warning("Method load is not implemented.")
-        return False
+        raise NotImplementedError()
 
     def save(self):
-        return self.add_bd()
+        return self.add_db()
 
     def delete(self):
-        warning("Method delete is not implemented.")
-        return False
+        raise NotImplementedError()
 
     def search(self):
-        warning("Method search is not implemented.")
-        return False
+        raise NotImplementedError()

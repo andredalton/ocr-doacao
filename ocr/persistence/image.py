@@ -8,15 +8,13 @@ from shutil import rmtree
 
 from werkzeug import secure_filename
 from uuid import uuid4
-from sqlalchemy.orm import exc
-from sqlalchemy import Column, String, Sequence, CHAR, DateTime, UniqueConstraint, Index, Enum, or_, \
-    ForeignKey
+from sqlalchemy import Column, String, Sequence, CHAR, DateTime, UniqueConstraint, Index, Enum, ForeignKey
 from sqlalchemy.dialects.mysql import INTEGER
 
 from . import Persistence, Base
 from .ong import Ong
 from ..config import ONG_FOLDER, HOST, IMG_NAME
-from ..functions import warning, make_md5
+from ..functions import make_md5
 
 
 class Image(Persistence):
@@ -39,53 +37,31 @@ class Image(Persistence):
             self.fextension = None
         self.complete_path = None
 
-    def flush_db(self):
+    def _flush_db(self):
         self.db.id_ong = self.id_ong
         self.db.md5 = self.md5
         self.db.path = os.path.join(HOST, self.path, IMG_NAME + self.fextension)
 
-    def unlink(self):
+    def __unlink(self):
         rmtree(self.complete_path)
 
-    def new_path(self):
+    def __new_path(self):
         package = __name__.split(".")[0]
         new_dir = os.path.join(self.ong_name, str(uuid4()))
         self.complete_path = os.path.join(os.getcwd(), package, ONG_FOLDER, new_dir)
         os.mkdir(self.complete_path, 0744)
         self.path = os.path.join(HOST, new_dir)
 
-    def load_db(self):
-        try:
-            q = self.session.query(ImageBD).filter(or_(ImageBD.id == self.id, ImageBD.md5 == self.md5,
-                                                       ImageBD.path == self.path)).one()
-        except UnboundLocalError:
-            warning("Try search in database without image path, md5 or id.")
-            return False
-        except exc.NoResultFound:
-            warning("Image [%d, %s, %s] not found." % (self.id, self.md5, self.path))
-            return False
-        except exc.MultipleResultsFound:
-            warning("Multiple results found for ong [%d, %s, %s]." % (self.id, self.md5, self.path))
-            return False
-        self.id = q.id
-        if q.md5 != self.md5:
-            warning("MD5 passed was overwritten by md5 in the database.")
-            self.md5 = q.md5
-        if q.path != self.path:
-            warning("Path passed was overwritten by path in the database.")
-            self.path = q.path
-        return True
-
     def save(self):
         if self.fd is None:
             return False
         filename = secure_filename(self.fd.filename)
         (name, self.fextension) = os.path.splitext(filename)
-        self.new_path()
+        self.__new_path()
         self.fd.save(os.path.join(self.complete_path, IMG_NAME + self.fextension))
         self.md5 = make_md5(os.path.join(self.complete_path, IMG_NAME), self.fextension)
-        if not self.add_bd():
-            self.unlink()
+        if not self.add_db():
+            self.__unlink()
             return False
         return True
 
