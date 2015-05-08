@@ -62,7 +62,8 @@ class TestOng(unittest.TestCase):
         mock_load.return_value = True
         self.assertFalse(self.o.load())
 
-    def test_get_one(self):
+    @mock.patch("ocr.persistence.ong.warning")
+    def test_get_one(self, mock_warning):
         mock_one = mock.Mock()
         mock_one.one.return_value = True
         mock_filter = mock.Mock()
@@ -74,6 +75,15 @@ class TestOng(unittest.TestCase):
         mock_one.one.assert_called_with()
         self.assertTrue(mock_filter.filter.called)
         mock_session.query.assert_called_with(OngBD)
+        mock_session.query.side_effect = UnboundLocalError()
+        self.assertFalse(self.o._get_one())
+        mock_warning.assert_called_with('Try search in database without ong name or id.')
+        mock_session.query.side_effect = exc.NoResultFound()
+        self.assertFalse(self.o._get_one())
+        mock_warning.assert_called_with('Ong [None, anyOng] not found.')
+        mock_session.query.side_effect = exc.MultipleResultsFound()
+        self.assertFalse(self.o._get_one())
+        mock_warning.assert_called_with('Multiple results found for ong [None, anyOng].')
 
     @mock.patch("ocr.persistence.ong.Ong._get_one")
     @mock.patch("ocr.persistence.ong.warning")
