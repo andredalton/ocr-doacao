@@ -32,7 +32,9 @@ class TestSession(unittest.TestCase):
         self.config()
 
     def test___init__(self):
-        self.mock_create_engine.assert_called_with('mysql+pymysql://%s:%s@%s/%s'  % (BD_USER, BD_PASSWORD, BD_HOST, BD_NAME), pool_recycle=7200, encoding='utf8', pool_size=100)
+        self.mock_create_engine.assert_called_with('mysql+pymysql://%s:%s@%s/%s' % (BD_USER, BD_PASSWORD, BD_HOST,
+                                                                                    BD_NAME),
+                                                   pool_recycle=7200, encoding='utf8', pool_size=100)
         self.mock_sessionmaker.assert_called_with(bind="engine")
 
     def test_get_session(self):

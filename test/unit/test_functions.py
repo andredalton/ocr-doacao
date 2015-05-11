@@ -10,6 +10,7 @@ sys.path.insert(0, os.path.join(local, "..", ".."))
 from ocr.functions import file_get_contents, file_write_contents, free_port, make_md5, port, warning
 from ocr.config import DAEMON
 
+
 class TestFunctions(unittest.TestCase):
     @mock.patch("__builtin__.open")
     def test_file_get_contents(self, mock_open):

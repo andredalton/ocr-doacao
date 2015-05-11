@@ -15,13 +15,11 @@ from ..functions import warning
 
 class Ong(Persistence):
     def __init__(self, session=None, id=None, name=None):
-        if id is None:
-            self.id = None
-        else:
+        self.id = None
+        if id is not None:
             self.id = int(id)
-        if name is None:
-            self.name = None
-        else:
+        self.name = None
+        if name is not None:
             self.name = str(name)
         self.db = OngBD(id=self.id, name=self.name)
         if session is None:
@@ -80,7 +78,7 @@ class Ong(Persistence):
         try:
             self.session.delete(ong)
             self.session.commit()
-        except exc.UnmappedInstanceError as e:
+        except exc.UnmappedInstanceError:
             warning("Delete from DB fail.")
             self.session.rollback()
             return False

@@ -44,7 +44,7 @@ class Persistence():
         try:
             self.session.add(self.db)
             self.session.commit()
-        except IntegrityError as e:
+        except IntegrityError:
             warning("Add to DB fail.")
             self.session.rollback()
             return False
