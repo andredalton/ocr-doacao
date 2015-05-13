@@ -22,6 +22,6 @@ $("#imgInp").change(function(){
 $("#upfile1").click(function () {
     $("#file1").trigger('click');
 });
-$(".loading").submit(function() {
+$("form").submit(function() {
     $(".loading").css("display", "block");
 });

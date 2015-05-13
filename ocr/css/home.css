@@ -1,0 +1,62 @@
+body {
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+img {
+  width: 100%;
+  height: auto;
+  margin-bottom: 10px;
+}
+
+.header
+{
+  padding-right: 15px;
+  padding-left: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.header h3 {
+  margin-top: 0;
+  margin-bottom: -10px;
+}
+
+.col {
+  position: relative;
+  min-height: 1px;
+  padding-right: 15px;
+  padding-left: 15px;
+  float: left;
+}
+
+.validation_error{
+	color: red;
+	font-size: 13px;
+	margin-top: 2px;
+}
+
+.hidden {
+	display: none;
+}
+
+@media screen and (min-width: 768px) {
+  .header {
+    padding-right: 0;
+    padding-left: 0;
+    margin-bottom: 30px;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .col {
+    margin-top: 20px;
+    width: 100%;
+  }
+}
+
+@media (min-width: 768px) {
+  .col {
+    width: 33%;
+  }
+}

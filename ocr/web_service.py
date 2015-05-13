@@ -9,6 +9,7 @@ from flask.ext.classy import FlaskView, route
 from persistence import Session
 from persistence.ong import Ong
 from persistence.image import Image
+from persistence.meta_image import MetaImage
 from .config import HOST, ALLOWED_EXTENSIONS, ONG_FOLDER
 
 
@@ -60,6 +61,33 @@ class WebView(FlaskView):
                 else:
                     return render_template('response.html', msg="Falha ao salvar imagem.", ong=o.get_name())
         return render_template('ong.html', host=HOST)
+
+    @route('<ong>/cadastro', methods=['GET', 'POST'])
+    def cadastre(self, ong):
+        o = Ong(session=self.session.get_session(), name=ong)
+        if not o.load():
+            return redirect(HOST + '/error')
+        if request.method == 'POST':
+            cnpj = request.form["cnpj"]
+            coo = request.form["coo"]
+            data = request.form["data"]
+            total = request.form["total"]
+            id_image = request.form["id_image"]
+            meta = MetaImage(session=self.session.get_session(), id_image=id_image)
+            meta.load()
+            meta.cnpj = cnpj
+            meta.coo = coo
+            meta.data = data
+            meta.total = total
+            meta.status = "valid"
+            meta.update()
+            return redirect(os.path.join(HOST, o.get_name(), 'cadastro'))
+        meta = MetaImage(session=self.session.get_session(), id_ong=o.get_id())
+        meta.search()
+        if meta.id_image is None:
+            return render_template('response.html', msg="Todas as imagens foram cadastradas!", ong=o.get_name(), host=HOST)
+        i = Image(session=self.session.get_session(), id=meta.id_image)
+        return render_template('cadastre.html', meta=meta, ong=o.get_name(), img=i, host=HOST)
 
     @route('<ong>/list')
     def list_images(self, ong=None):

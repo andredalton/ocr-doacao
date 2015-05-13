@@ -7,6 +7,7 @@ DAEMON = '.ocr.daemon'
 DEBUG = False
 ONG_FOLDER = 'ongs'
 IMG_NAME = 'img'
+EDIT_TIME = 1
 
 BD_USER = 'root'
 BD_PASSWORD = ''

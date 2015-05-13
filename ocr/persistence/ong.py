@@ -107,7 +107,7 @@ class OngBD(Base):
     __tablename__ = 'ong'
     __table_args__ = {'mysql_engine': 'InnoDB'}
     id = Column(INTEGER(unsigned=True), Sequence('user_id_seq'), primary_key=True)
-    name = Column(String(50), nullable=False, unique=True)
+    name = Column(String(collation='utf8_general_ci', length=50), nullable=False, unique=True)
     UniqueConstraint('name', name='unique_name')
 
     def __repr__(self):

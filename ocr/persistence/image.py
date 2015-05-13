@@ -8,26 +8,33 @@ from shutil import rmtree
 
 from werkzeug import secure_filename
 from uuid import uuid4
-from sqlalchemy import Column, String, Sequence, CHAR, DateTime, UniqueConstraint, Index, Enum, ForeignKey
+from sqlalchemy.orm import exc
+from sqlalchemy import Column, String, Sequence, CHAR, DateTime, UniqueConstraint, Index, Enum, ForeignKey, or_
 from sqlalchemy.dialects.mysql import INTEGER
 
 from . import Persistence, Base
-from .ong import Ong
+from ong import Ong
+from meta_image import MetaImage
 from ..config import ONG_FOLDER, HOST, IMG_NAME
-from ..functions import make_md5
+from ..functions import make_md5, warning
 
 
 class Image(Persistence):
-    def __init__(self, session=None, ong_name=None, fd=None):
-        self.id = None
+    def __init__(self, session=None, ong_name=None, id=None, fd=None):
+        self.session = session
+        self.id = id
         self.ong_name = ong_name
         self.path = None
         self.md5 = None
         self.send_time = None
-        self.session = session
-        o = Ong(self.session, name=self.ong_name)
-        o.load()
-        self.id_ong = o.get_id()
+        self.status = None
+        if id is not None:
+            self.id = id
+            self.load()
+        else:
+            o = Ong(self.session, name=self.ong_name)
+            o.load()
+            self.id_ong = o.get_id()
         self.db = ImageBD(id_ong=self.id_ong, path=self.path, md5=self.md5, send_time=self.send_time)
         self.fd = fd
         if fd is not None:
@@ -38,6 +45,7 @@ class Image(Persistence):
         self.complete_path = None
 
     def _flush_db(self):
+        self.db.id = self.id
         self.db.id_ong = self.id_ong
         self.db.md5 = self.md5
         self.db.path = os.path.join(HOST, self.path, IMG_NAME + self.fextension)
@@ -52,6 +60,30 @@ class Image(Persistence):
         os.mkdir(self.complete_path, 0744)
         self.path = os.path.join(HOST, new_dir)
 
+    def load(self):
+        try:
+            q = self.session.query(ImageBD).filter(or_(
+                ImageBD.id == self.id,
+                ImageBD.md5 == self.md5,
+                ImageBD.path == self.path
+            )).one()
+        except UnboundLocalError:
+            warning("Try search in database without image id, md5 or path.")
+            return False
+        except exc.NoResultFound:
+            warning("Image [%d, %s, %s] not found." % (self.id, self.md5, self.path))
+            return False
+        except exc.MultipleResultsFound:
+            warning("Multiple results found for image [%d, %s, %s]." % (self.id, self.md5, self.path))
+            return False
+        self.id = q.id
+        self.path = q.path
+        self.md5 = q.md5
+        self.id_ong = q.id_ong
+        self.send_time = q.send_time
+        self.status = q.status
+        self.session.commit()
+
     def save(self):
         if self.fd is None:
             return False
@@ -63,6 +95,9 @@ class Image(Persistence):
         if not self.add_db():
             self.__unlink()
             return False
+        m = MetaImage(session=self.session, id_image=self.db.id, id_ong=self.id_ong)
+        if not m.save():
+            warning("Fail to create meta_image.")
         return True
 
     def search(self):
@@ -88,10 +123,10 @@ class ImageBD(Base):
     id = Column(INTEGER(unsigned=True), Sequence('user_id_seq'), primary_key=True)
     id_ong = Column(INTEGER(unsigned=True), ForeignKey("ong.id", onupdate="CASCADE", ondelete="CASCADE"), default=0,
                     nullable=False)
-    path = Column(String(255), default="", nullable=False, unique=True)
-    md5 = Column(CHAR(32), default="", nullable=False, unique=True)
-    send_time = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
-    status = Column(Enum(u'preprocessing', u'processing', u'processed'), default=u'preprocessing', nullable=False)
+    path = Column(String(collation='utf8_general_ci', length=255), default="", nullable=False, unique=True)
+    md5 = Column(CHAR(collation='utf8_general_ci', length=32), default="", nullable=False, unique=True)
+    send_time = Column(DateTime, default=datetime.datetime.now, nullable=False)
+    status = Column(Enum(u'preprocessing', u'processing', u'processed'), nullable=False, default=u'preprocessing', server_default=u'preprocessing')
     UniqueConstraint('path', name='path')
     UniqueConstraint('md5', name='md5')
     Index('id_ong')

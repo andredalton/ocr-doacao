@@ -30,4 +30,5 @@ def create_tables():
     engine.execute("USE `%s`" % BD_NAME)
     from persistence.ong import OngBD
     from persistence.image import ImageBD
+    from persistence.meta_image import MetaImageBD
     Base.metadata.create_all(engine)

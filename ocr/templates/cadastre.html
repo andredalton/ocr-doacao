@@ -1,0 +1,72 @@
+<html>
+<head>
+    <title>
+        OCR DOAÇÃO - {{ ong }}
+    </title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/png" href="{{ host }}/static/images/favicon.ico" />
+    <link rel="stylesheet" href="{{ host }}/static/css/home.css">
+    <link rel="stylesheet" href="{{ host }}/static/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container">
+    <div class="header clearfix">
+        <nav>
+            <ul class="nav nav-pills pull-right">
+                <li role="presentation" class="active"><a href="#">Home</a></li>
+            </ul>
+        </nav>
+        <h3 class="text-muted">OCR Doação  - {{ ong }}<br />Restam {{ meta.count()+1 }}</h3>
+    </div>
+    <div class="col">
+        <fieldset>
+            <legend>Cupom Fiscal</legend>
+            <img id="notaFiscal" src="{{ img.path }}">
+        </fieldset>
+    </div>
+    <div class="col">
+        <form role="form" action="{{host}}/{{ong}}/cadastro" method="post" class="form">
+            <fieldset>
+                <legend>Dados do cupom fiscal</legend>
+                <div class="hidden">
+                    <input type="text" value="{{meta.id_image}}" name="id_image">
+                    <input type="text" value="{{meta.id_ong}}" name="id_ong">
+                </div>
+                <div class="form-group">
+                    <label for="cnpj">CNPJ:</label>
+                    <input type="text" class="form-control" id="cnpj" name="cnpj" placeholder=""
+                           value="{{meta.cnpj}}" >
+                </div>
+                <div class="form-group">
+                    <label for="coo">COO:</label>
+                    <input type="text" class="form-control" id="coo" name="coo" value="{{meta.coo}}" >
+                </div>
+                <div class="form-group">
+                    <label for="valor">Valor:</label>
+                    <input type="text" class="form-control" id="valor" name="total" value="{{meta.total}}" >
+                </div>
+                <div class="form-group">
+                    <label for="data">Data:</label>
+                    <input type="text" class="form-control" id="data" name="data" value="{{meta.data}}" >
+                </div>
+                <div id="erro" class="form-group"></div>
+                <button type="submit" class="btn btn-primary"><b>Confirmar</b></button>
+            </fieldset>
+        </form>
+    </div>
+    <div class="col">
+        <fieldset>
+            <legend>Resultado</legend>
+            <div class="form-group">
+                <label for="resultado">Resultado:</label>
+                <textarea name="resultado" class="form-control" id="resultado" cols="20" rows="15"></textarea>
+            </div>
+        </fieldset>
+    </div>
+</div>
+<script src="{{ host }}/static/js/jquery.min.js"></script>
+<script src="{{ host }}/static/js/jquery.mask.min.js"></script>
+<script src="{{ host }}/static/js/error.js"></script>
+</body>
+</html>
