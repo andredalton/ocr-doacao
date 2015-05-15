@@ -1,0 +1,5 @@
+mysql-server
+libmysqlclient-dev
+python
+python-pip
+python-dev
